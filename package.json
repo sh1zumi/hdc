@@ -11,5 +11,9 @@
     "nhentai"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "yargs": "^15.1.0"
+  }
 }
