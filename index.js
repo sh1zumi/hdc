@@ -1,4 +1,5 @@
-const fetch = require('./modules/nhentai/fetch');
+const fetch = require('./modules/nhentai/fetch')
+const download = require('./modules/nhentai/download')
 // const yargs = require('yargs');
 
 // const argv = yargs
@@ -33,10 +34,15 @@ const fetch = require('./modules/nhentai/fetch');
 
 // console.log(argv);
 
-fetch.downloadBookPage({
-    mediaId: 1014314,
-    page: 1,
-    fileExtension: 'jpg'
-}).then(res => {
-    console.log('complete')
+// download.downloadBookPage({
+//     mediaId: 1014314,
+//     page: 1,
+//     fileExtension: 'jpg'
+// }).then(res => {
+//     console.log('complete')
+// })
+
+fetch.getBookInfo(269972)
+.then(function (response) {
+    console.log(response.data)
 })
