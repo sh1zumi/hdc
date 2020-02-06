@@ -25,18 +25,23 @@ async function downloadBookPage(mediaId, page, fileExtension, options) {
     let filename = page + '.' + fileExtension
     let reqPath = path.join('galleries', mediaId, filename)
     let url = nhentaiCfg.imageOrigin + '/' + reqPath
-    console.log('Attempt to download ' + url)
 
-    return axios({
-        method: 'get',
-        url: url,
-        responseType: 'stream'
+    return new Promise(resolve => {
+        console.log('Attempt to download ' + url)
+        resolve()
+    })
+    .then( _ => {
+        return axios({
+            method: 'get',
+            url: url,
+            responseType: 'stream'
+        })    
     })
     .then( res => {
         return fs.promises.access(options.directory)
         .catch( _ => {
             console.log('Directory ' + options.directory + 'not found. Creating one')
-            fs.promises.mkdir(options.directory, { recursive: true })
+            return fs.promises.mkdir(options.directory, { recursive: true })
         })
         .then(_ => res)
     })
@@ -59,11 +64,13 @@ const fileExtensionMap = {
  * @param {string} bookId - The book ID
  * @param {object} options Configuration for the download operation
  *  - delay `number` `optional` - Delay for subsequent tasks
+ *  - directory `string` optional - The save directory
  */
 async function downloadBook(bookId, options) {
     // Apply defaults to options 
     let defaultOptions = { 
-        delay: 500
+        delay: 500,
+        directory: '.'
     }
     options = Object.assign(defaultOptions, options)
 
@@ -87,7 +94,7 @@ async function downloadBook(bookId, options) {
         console.log(imageMetas.length + ' images found')
 
         let bookTitle = res.title.japanese || res.title.english || bookId
-        let dir = path.join('.', bookTitle)
+        let dir = path.join(options.directory, bookTitle)
 
         // Chain the download tasks
         for (let i = 0; i < imageMetas.length; i++) {
