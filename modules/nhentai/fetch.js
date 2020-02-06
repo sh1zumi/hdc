@@ -5,8 +5,8 @@ const axios = require('axios')
 const nhentaiCfg = require('./config')
 
 /**
- * 
- * @param {string} bookId = The book ID
+ * Retrieve the info of certain book
+ * @param {string} bookId - The book ID
  */
 async function getBookInfo(bookId) {
     if (!_.isString(bookId)) {
@@ -19,6 +19,8 @@ async function getBookInfo(bookId) {
         method: 'get',
         url: nhentaiCfg.defaultOrigin + '/' + reqPath,
         responseType: 'json'
+    }).then( res => {
+        return res.data
     })
 }
 

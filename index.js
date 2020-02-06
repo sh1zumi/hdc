@@ -34,15 +34,8 @@ const download = require('./modules/nhentai/download')
 
 // console.log(argv);
 
-// download.downloadBookPage({
-//     mediaId: 1014314,
-//     page: 1,
-//     fileExtension: 'jpg'
-// }).then(res => {
-//     console.log('complete')
-// })
-
-fetch.getBookInfo(269972)
-.then(function (response) {
-    console.log(response.data)
+download.downloadBook('269972', {
+    delay: 500
+}).then(res => {
+    console.log('complete')
 })
