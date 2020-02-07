@@ -1,45 +1,24 @@
 const fetch = require('./modules/nhentai/fetch')
 const download = require('./modules/nhentai/download')
-// const yargs = require('yargs');
 
-// const argv = yargs
-//     .command('lyr', 'Tells whether an year is leap year or not', {
-//         year: {
-//             description: 'the year to check for',
-//             alias: 'y',
-//             type: 'number',
-//         }
-//     })
-//     .option('time', {
-//         alias: 't',
-//         description: 'Tell the present Time',
-//         type: 'boolean',
-//     })
-//     .help()
-//     .alias('help', 'h')
-//     .argv;
+const yargs = require('yargs')
 
-// if (argv.time) {
-//     console.log('The current time is: ', new Date().toLocaleTimeString());
-// }
-
-// if (argv._.includes('lyr')) {
-//     const year = argv.year || new Date().getFullYear();
-//     if (((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0)) {
-//         console.log(`${year} is a Leap Year`);
-//     } else {
-//         console.log(`${year} is NOT a Leap Year`);
-//     }
-// }
-
-// console.log(argv);
-
-download.downloadBook('269972', {
-    delay: 500,
-    directory: '/Users/hlwanhoj/Desktop',
-    naming: (page, pageCount) => (page + '').padStart(3, '0')
-}).then(res => {
-    console.log('complete')
-}).catch(err => {
-    console.error(err)
-})
+const argv = yargs
+    .command({
+        command: 'download <bookId>',
+        desc: 'Download a book from source',
+        handler: (argv) => {
+            download.downloadBook(argv.bookId, {
+                delay: 1,
+                directory: '.',
+                naming: (page, pageCount) => (page + '').padStart(3, '0')
+            }).then(res => {
+                console.log('complete')
+            }).catch(err => {
+                console.error(err)
+            })
+        }
+    })
+    .help()
+    .alias('help', 'h')
+    .argv
