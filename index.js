@@ -36,7 +36,8 @@ const download = require('./modules/nhentai/download')
 
 download.downloadBook('269972', {
     delay: 500,
-    directory: '/Users/hlwanhoj/Desktop'
+    directory: '/Users/hlwanhoj/Desktop',
+    naming: (page, pageCount) => (page + '').padStart(3, '0')
 }).then(res => {
     console.log('complete')
 }).catch(err => {

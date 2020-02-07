@@ -14,17 +14,19 @@ const axios = require('axios')
  * @param {string} fileExtension The file extension of the downloaded page
  * @param {object} options Configuration for the download operation
  *  - directory `string` `optional` - The save directory
+ *  - naming `function` optional - The naming rules
  */
 async function downloadBookPage(mediaId, page, fileExtension, options) {
     // Apply defaults to options 
-    let defaultOptions = { 
+    const defaultOptions = { 
         directory: '.'
     }
-    options = Object.assign(defaultOptions, options)
+    options = Object.assign({}, defaultOptions, options)
 
-    let filename = page + '.' + fileExtension
-    let reqPath = path.join('galleries', mediaId, filename)
-    let url = nhentaiCfg.imageOrigin + '/' + reqPath
+    const namingFunc = _.isFunction(options.naming) ? options.naming : (page => page)
+    const filename = page + '.' + fileExtension
+    const reqPath = path.join('galleries', mediaId, filename)
+    const url = nhentaiCfg.imageOrigin + '/' + reqPath
 
     return new Promise(resolve => {
         console.log('Attempt to download ' + url)
@@ -46,10 +48,11 @@ async function downloadBookPage(mediaId, page, fileExtension, options) {
         .then(_ => res)
     })
     .then( res => {
-        let outputPath = path.join(options.directory, filename)
+        const name = namingFunc(page) + '.' + fileExtension
+        const outputPath = path.join(options.directory, name)
 
         res.data.pipe(fs.createWriteStream(outputPath))
-        console.log('Saved as ' + filename)
+        console.log('Saved as ' + name)
     })
 }
 
@@ -65,26 +68,29 @@ const fileExtensionMap = {
  * @param {object} options Configuration for the download operation
  *  - delay `number` `optional` - Delay for subsequent tasks
  *  - directory `string` optional - The save directory
+ *  - naming `function` optional - The naming rules
  */
 async function downloadBook(bookId, options) {
     // Apply defaults to options 
-    let defaultOptions = { 
+    const defaultOptions = { 
         delay: 500,
         directory: '.'
     }
-    options = Object.assign(defaultOptions, options)
+    options = Object.assign({}, defaultOptions, options)
+
+    const namingFunc = _.isFunction(options.naming) ? options.naming : ((page, pageCount) => page)
 
     return fetch.getBookInfo(bookId).then( res => {
         console.log('Found book ' + res.title.japanese)
 
-        let mediaId = res['media_id']
+        const mediaId = res['media_id']
         if (!_.isString(mediaId)) {
             throw Error('Media ID not found')
         }
 
         // Create initial empty promise
         let task = new Promise(resolve => { resolve() })
-        let imageMetas = res.images.pages
+        const imageMetas = res.images.pages
 
         // Return immediately if there is no image
         if (!_.isArray(imageMetas) || imageMetas.length === 0) { 
@@ -93,16 +99,17 @@ async function downloadBook(bookId, options) {
         }
         console.log(imageMetas.length + ' images found')
 
-        let bookTitle = res.title.japanese || res.title.english || bookId
-        let dir = path.join(options.directory, bookTitle)
+        const bookTitle = res.title.japanese || res.title.english || bookId
+        const dir = path.join(options.directory, bookTitle)
 
         // Chain the download tasks
         for (let i = 0; i < imageMetas.length; i++) {
-            let meta = imageMetas[i]
-            let ext = fileExtensionMap[meta.t]
-            let page = i + 1
-            let opt = {
-                directory: dir
+            const meta = imageMetas[i]
+            const ext = fileExtensionMap[meta.t]
+            const page = i + 1
+            const opt = {
+                directory: dir,
+                naming: (page => namingFunc(page, imageMetas.length) )
             }
             task = task.then( v => downloadBookPage(mediaId, page, ext, opt) )
 
