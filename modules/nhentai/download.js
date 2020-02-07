@@ -114,7 +114,7 @@ async function downloadBook(bookId, options) {
             task = task.then( v => downloadBookPage(mediaId, page, ext, opt) )
 
             // Apply delay for subsequent tasks
-            if (i !== 0) {
+            if (i !== 0 && options.delay > 0) {
                 task = task.then( v => new Promise(resolve => setTimeout(resolve, options.delay)) )
             }
         }
