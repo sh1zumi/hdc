@@ -1,6 +1,6 @@
-const download = require('../modules/nhentai/download')
+const downloader = require('../modules/nhentai/download')
 
-exports.command = 'download <bookId>'
+exports.command = 'download <bookIDs..>'
 
 exports.describe = 'Download a book from source'
 
@@ -13,7 +13,7 @@ exports.builder = {
 }
 
 exports.handler = (argv) => {
-    download.downloadBook(argv.bookId, {
+    downloader.downloadBooks(argv.bookIDs, {
         delay: 1,
         directory: argv.destination,
         naming: (page, pageCount) => (page + '').padStart(3, '0')

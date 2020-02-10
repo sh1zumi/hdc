@@ -61,7 +61,7 @@ const fileExtensionMap = {
 
 /**
  * Download certain book
- * @param {string} bookId - The book ID
+ * @param {string} bookId The book ID
  * @param {object} options Configuration for the download operation
  *  - delay `number` `optional` - Delay for subsequent tasks
  *  - directory `string` optional - The save directory
@@ -120,7 +120,33 @@ async function downloadBook(bookId, options) {
     })
 }
 
+/**
+ * Download certain books
+ * @param {string|string[]} bookIDs The book IDs
+ * @param {object} options Configuration for the download operation
+ *  - delay `number` `optional` - Delay for subsequent tasks
+ *  - directory `string` optional - The save directory
+ *  - naming `function` optional - The naming rules
+ */
+async function downloadBooks(bookIDs, options) {
+    let IDs = []
+    
+    if (!_.isArray(bookIDs)) {
+        IDs.push(bookIDs)
+    } else {
+        IDs = bookIDs
+    }
+
+    const mappedIDs = IDs.map( v => _.toString(v) )
+    let task = new Promise(resolve => { resolve() })
+    for (let i = 0; i < mappedIDs.length; i++) {
+        task = task.then( v => downloadBook(mappedIDs[i], options) )
+    }
+    return task
+}
+
 module.exports = {
     downloadBookPage: downloadBookPage,
-    downloadBook: downloadBook
+    downloadBook: downloadBook,
+    downloadBooks: downloadBooks
 } 
