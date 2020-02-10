@@ -6,7 +6,7 @@ exports.describe = 'Download a book from source'
 
 exports.builder = {
   destination: {
-    describe: 'The saving directory.',
+    describe: 'The save directory.',
     alias: 'd',
     default: '.'
   }

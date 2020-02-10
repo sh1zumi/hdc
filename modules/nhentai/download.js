@@ -28,17 +28,11 @@ async function downloadBookPage(mediaId, page, fileExtension, options) {
     const reqPath = path.join('galleries', mediaId, filename)
     const url = nhentaiCfg.imageOrigin + '/' + reqPath
 
-    return new Promise(resolve => {
-        console.log('Attempt to download ' + url)
-        resolve()
-    })
-    .then( _ => {
-        return axios({
-            method: 'get',
-            url: url,
-            responseType: 'stream'
-        })    
-    })
+    return axios({
+        method: 'get',
+        url: url,
+        responseType: 'stream'
+    })    
     .then( res => {
         return fs.promises.access(options.directory)
         .catch( _ => {
@@ -52,7 +46,10 @@ async function downloadBookPage(mediaId, page, fileExtension, options) {
         const outputPath = path.join(options.directory, name)
 
         res.data.pipe(fs.createWriteStream(outputPath))
-        console.log('Saved as ' + name)
+        console.log(url + '     ->    ' + name)
+    })
+    .catch( err => {
+        console.log(url + '     Failed')
     })
 }
 
@@ -101,6 +98,7 @@ async function downloadBook(bookId, options) {
 
         const bookTitle = res.title.japanese || res.title.english || bookId
         const dir = path.join(options.directory, bookTitle)
+        console.log('Will save to ' + dir)
 
         // Chain the download tasks
         for (let i = 0; i < imageMetas.length; i++) {
