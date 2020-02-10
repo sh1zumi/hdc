@@ -46,7 +46,13 @@ async function downloadBookPage(mediaId, page, fileExtension, options) {
         const outputPath = path.join(options.directory, name)
 
         res.data.pipe(fs.createWriteStream(outputPath))
-        console.log(url + '     ->    ' + name)
+        return {
+            url: url,
+            output: {
+                path: outputPath,
+                name: name
+            }
+        }
     })
     .catch( err => {
         console.log(url + '     Failed')
@@ -88,28 +94,33 @@ async function downloadBook(bookId, options) {
         // Create initial empty promise
         let task = new Promise(resolve => { resolve() })
         const imageMetas = res.images.pages
+        const totalPages = imageMetas.length
 
         // Return immediately if there is no image
-        if (!_.isArray(imageMetas) || imageMetas.length === 0) { 
+        if (!_.isArray(imageMetas) || totalPages === 0) { 
             console.log('No images found')
             return task
         }
-        console.log(imageMetas.length + ' images found')
+        console.log(totalPages + ' images found')
 
         const bookTitle = res.title.japanese || res.title.english || bookId
         const dir = path.join(options.directory, bookTitle)
         console.log('Will save to ' + dir)
 
         // Chain the download tasks
-        for (let i = 0; i < imageMetas.length; i++) {
+        for (let i = 0; i < totalPages; i++) {
             const meta = imageMetas[i]
             const ext = fileExtensionMap[meta.t]
             const page = i + 1
             const opt = {
                 directory: dir,
-                naming: (page => namingFunc(page, imageMetas.length) )
+                naming: (page => namingFunc(page, totalPages) )
             }
-            task = task.then( v => downloadBookPage(mediaId, page, ext, opt) )
+            task = task.then(v => {
+                return downloadBookPage(mediaId, page, ext, opt)
+            }).then(res => {
+                console.log('[' + page + '/' + totalPages + '] ' + res.url + '     ->    ' + res.output.name)
+            })
 
             // Apply delay for subsequent tasks
             if (i !== 0 && options.delay > 0) {
